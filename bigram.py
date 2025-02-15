@@ -67,17 +67,40 @@ def token_embedding_table(vocab_size):
 
 def forward(idx, targets): 
     
+    logits = token_embedding_table(vocab_size)(idx)
     if targets is None: 
         loss = None 
-    logits = token_embedding_table(vocab_size)(idx)
-    B, T, C = logits.shape
-    logits  = logits.reshape(B*T, C)
-    targets  = targets.reshape(B*T)
 
-    loss  = CrossEntropyLoss()(logits, targets)
+    else:
+        
+        B, T, C = logits.shape
+        logits  = logits.reshape(B*T, C)
+        targets  = targets.reshape(B*T)
+        loss  = CrossEntropyLoss()(logits, targets)
 
     return logits, loss
 
 logits, loss = forward(xb, yb)
 
 print(loss)
+
+def generate(idx, max_new_tokens):
+    # idx is (B, T) array of indices in the current context
+    key = jax.random.PRNGKey(0)  # initial key
+    for _ in range(max_new_tokens):
+        # get the predictions
+        logits, loss = forward(idx, None)
+        # focus only on the last time step
+        logits = logits[:, -1] # becomes (B, C)
+        # apply softmax to get probabilities
+        probs = jax.nn.softmax(logits, axis=-1) # (B, C)
+        # get a new key for each iteration
+        key, subkey = jax.random.split(key)
+        # sample from the distribution using the new key
+        idx_next = jax.random.categorical(subkey, probs, axis=-1)[:, None] # (B, 1)
+        # append sampled index to the running sequence
+        idx = jnp.concatenate((idx, idx_next), axis=1) # (B, T+1)
+    return idx
+
+x = jnp.zeros((1, 1), dtype=jnp.int32)
+print(decode(generate(x, 100)[0].tolist()))
