@@ -19,7 +19,7 @@ n_layer = 4
 #-------------
 tril_mask = jnp.tril(jnp.ones((block_size, block_size)))
 #--------------
-random.PRNGKey(1337)
+key = random.PRNGKey(1337)
 
 
 #read the data  
@@ -57,10 +57,11 @@ def get_batch(key, split='train'):
     return (x, y), key
 
 
+
+
 '''
 if you are trying to understand or re-create, I advise you to be careful with broadcasting issues
 '''
-
 @jax.jit
 def Head_forward(x, k_wei, q_wei, v_wei, mask):
 
@@ -96,6 +97,9 @@ class Head(nnx.Module):
             self.value.weight, 
             self.mask
             )
+    
+
+
 @jax.jit
 def MultiHead_forward(x, heads_wei, proj_wei):
     head_out = []
@@ -106,7 +110,6 @@ def MultiHead_forward(x, heads_wei, proj_wei):
     out = jnp.concatenate(head_out, axis=-1)
     out = out @ proj_wei
     return out
-
 class MultiHeadAttention(nnx.Module): 
 
     def __init__(self, num_heads, head_size):
@@ -126,26 +129,93 @@ class MultiHeadAttention(nnx.Module):
         ]
 
         return MultiHead_forward(x, heads_wei, self.proj.weight)
+
+
+@jax.jit
+def feed_forward(x, w1, w2): 
+    x = x @ w1
+    x = jax.nn.relu(x) 
+    x = x @ w2
+    return x
+class FeedForward(nnx.Module): 
+
+    def __init__(self, n_embd): 
+        super().__init__()
+        
+        self.w1 = nnx.Linear(n_embd, 4 * n_embd), 
+        self.w2 = nnx.Linear(4 * n_embd, n_embd)
+        
+    def __call__(self, x): 
+        return feed_forward(x, self.w1.weight, self.w2.weight)
+
+@jax.jit
+def layer_norm(x, gamma, beta, eps=1e-5):
+    mean = jnp.mean(x, axis=-1, keepdims=True)
+    variance = jnp.var(x, axis=-1, keepdims=True)
+    x_norm = (x - mean) / jnp.sqrt(variance + eps)
+    return gamma * x_norm + beta
+class LayerNorm(nnx.Module):
+    def __init__(self, dim, eps=1e-5):
+        super().__init__()
+        self.gamma = jnp.ones(dim)  
+        self.beta = jnp.zeros(dim)  
+        self.eps = eps
+
+    def __call__(self, x):
+        return layer_norm(x, self.gamma, self.beta, self.eps)  
     
 
+class Block(nnx.Module): 
+    """ Transformer block: communication + computation """
+
+    def __init__(self, n_embd, n_head): 
+        super().__init__()
+        head_size = n_embd // n_head
+        self.sa = MultiHeadAttention(n_head, head_size)
+        self.ffwd = FeedForward(n_embd)
+        self.ln1 = LayerNorm(n_embd)
+        self.ln2 = LayerNorm(n_embd)
+    
+    def __call__(self, x): 
+        
+        #communication through self attention 
+        x = x + self.sa(self.ln1(x))
+        #computation
+        x = x + self.ffwd(self.ln2(x))
+        return x
+    
 class BigramLM(nnx.Module):
     def __init__(self, vocab_size):
+        super().__init__()
         # Initialize embedding with proper scaling
-        key = random.PRNGKey(1337)
         self.token_embedding = jnp.array(
-            random.normal(key, (vocab_size, vocab_size)) * 0.02
+            random.normal(random.PRNGKey(1337), (vocab_size, n_embd)) * 0.02
         )
+        self.position_embedding = jnp.array(
+            random.normal(random.PRNGKey(1337), (block_size, n_embd)) * 0.02
+        )
+        
+        self.blocks = nnx.Sequential(*[Block(n_embd, n_head) for _ in range(n_layer)])
+        self.ln_f = LayerNorm(n_embd)
+        self.lm_head = nnx.Linear(n_embd, vocab_size, rngs=rngs)
 
     def __call__(self, idx, targets=None):
-        # idx and targets are both (B,T) tensor of integers
-        logits = self.token_embedding[idx]  # (B,T,C)
+
+        B, T = idx.shape()
+        tok_embd = self.token_embedding(idx)
+        pos_embd = self.positional_embedding[:T]
+        x = tok_embd + pos_embd
+        x = self.blocks(x)
+        x = self.ln_f(x)
+        logits = self.lm_head(x) #(B, T, vocab_size)
+        
 
         if targets is None:
             loss = None
         else:
             B, T, C = logits.shape
-            logits = logits.reshape(-1, C)
-            targets = targets.reshape(-1)
+            logits = logits.reshape(B*T, C)
+            targets = targets.reshape(B*T)
             loss = optax.softmax_cross_entropy_with_integer_labels(logits, targets).mean()
 
         return logits, loss
@@ -169,19 +239,14 @@ class BigramLM(nnx.Module):
         
 
 
-
-
-
+#----
 model = BigramLM(vocab_size)
-optimizer = optax.adam(1e-3)
-opt_state = optimizer.init(model.token_embedding)
 
 @jax.jit
 def train_step(parameters, opt_state, batch):
 
   def loss_fn(p):
-    model.token_embedding = p
-    _, loss = model(xb, yb)
+    logits, loss = model.apply(parameters, batch[0], batch[1])
     print(loss)
     return loss 
 
@@ -191,15 +256,3 @@ def train_step(parameters, opt_state, batch):
 
   return new_params, new_opt_state, loss
 
-params = model.token_embedding
-key = random.PRNGKey(1337)
-
-for step in range(10000):
-    batch, key = get_batch(key, 'train')
-    xb, yb = batch
-    params, opt_state, loss = train_step(params, opt_state, batch)
-    if step % 10 == 0:
-        print(f'step {step}: loss {loss:.4f}')
-
-
-print(decode(model.generate(idx = jnp.zeros((1, 1), dtype=jnp.int32), max_new_tokens=100, key=key)[0].tolist()))
