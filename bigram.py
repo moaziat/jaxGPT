@@ -9,9 +9,16 @@ from flax import nnx
 #-- Hyperparameters 
 batch_size = 64
 block_size = 256
-max_iter = 500
+max_iters = 5000
+eval_interval = 100
+lr = 1e-3 
+eval_iters = 200
+n_embd = 64
+n_head = 4
+n_layer = 4
 #-------------
-
+tril_mask = jnp.tril(jnp.ones((block_size, block_size)))
+#--------------
 random.PRNGKey(1337)
 
 
@@ -40,7 +47,8 @@ train_data = data[:int(n)]
 val_data = data[int(n):] 
 
 
-#data batching 
+#data batching
+
 def get_batch(key, split='train'): 
     data = train_data if split == 'train' else val_data
     ix = random.randint(key, (batch_size,), 0, len(data) - block_size)
@@ -49,6 +57,76 @@ def get_batch(key, split='train'):
     return (x, y), key
 
 
+'''
+if you are trying to understand or re-create, I advise you to be careful with broadcasting issues
+'''
+
+@jax.jit
+def Head_forward(x, k_wei, q_wei, v_wei, mask):
+
+    B, T, C = x.shape
+    k = x @ k_wei
+    q = x @ q_wei
+    v = x @ v_wei
+    
+    #Attention scores = (Q * T(K) )/ sqrt(C) ; Attention is all you need bb
+
+    wei = q @ jnp.transpose(k, (-2, -1)) * C **-0.5 
+    wei = jnp.where(mask[:T, :T], wei, float('-inf'))
+    wei = jax.nn.softmax(wei, axis=-1) 
+
+    v = x @ v_wei
+    out = wei @ v
+    return out
+
+class Head(nnx.Module): 
+    def __init__(self, head_size): 
+        super().__init__()
+        self.key = nnx.Linear(n_embd, head_size, use_bias=False)
+        self.query = nnx.Linear(n_embd, head_size, use_bias=False)
+        self.value = nnx.Linear(n_embd, head_size, use_bias=False)
+        self.mask = jnp.tril(jnp.ones(block_size, block_size))
+        
+
+    def __call__(self, x): 
+
+        return Head_forward(x,
+            self.key.weight, 
+            self.query.weight, 
+            self.value.weight, 
+            self.mask
+            )
+@jax.jit
+def MultiHead_forward(x, heads_wei, proj_wei):
+    head_out = []
+
+    for w in heads_wei:
+        head_out = Head_forward(x, w['key'], w['query'], w['value'], tril_mask)
+        head_out.append(head_out)
+    out = jnp.concatenate(head_out, axis=-1)
+    out = out @ proj_wei
+    return out
+
+class MultiHeadAttention(nnx.Module): 
+
+    def __init__(self, num_heads, head_size):
+        super().__init__()
+        self.heads = [Head(head_size) for _ in range(num_heads)]
+        self.proj  = nnx.Linear(n_embd, n_embd)
+    
+    def __call__(self, x): 
+        
+        heads_wei = [{
+
+            'key': h.key.weight, 
+            'query': h.query.weight, 
+            'value': h.value.weight
+
+        } for h in self.heads
+        ]
+
+        return MultiHead_forward(x, heads_wei, self.proj.weight)
+    
 
 class BigramLM(nnx.Module):
     def __init__(self, vocab_size):
@@ -92,6 +170,8 @@ class BigramLM(nnx.Module):
 
 
 
+
+
 model = BigramLM(vocab_size)
 optimizer = optax.adam(1e-3)
 opt_state = optimizer.init(model.token_embedding)
@@ -113,9 +193,13 @@ def train_step(parameters, opt_state, batch):
 
 params = model.token_embedding
 key = random.PRNGKey(1337)
-for step in range(500):
+
+for step in range(10000):
     batch, key = get_batch(key, 'train')
     xb, yb = batch
     params, opt_state, loss = train_step(params, opt_state, batch)
     if step % 10 == 0:
         print(f'step {step}: loss {loss:.4f}')
+
+
+print(decode(model.generate(idx = jnp.zeros((1, 1), dtype=jnp.int32), max_new_tokens=100, key=key)[0].tolist()))
