@@ -82,11 +82,10 @@ def Head_forward(x, k_wei, q_wei, v_wei, mask):
 
 class Head(nnx.Module): 
     def __init__(self, head_size): 
-        super().__init__()
-        self.key = nnx.Linear(n_embd, head_size, use_bias=False)
-        self.query = nnx.Linear(n_embd, head_size, use_bias=False)
-        self.value = nnx.Linear(n_embd, head_size, use_bias=False)
-        self.mask = jnp.tril(jnp.ones(block_size, block_size))
+        self.key = nnx.Linear(n_embd, head_size, use_bias=False, rngs=nnx.Rngs(0))
+        self.query = nnx.Linear(n_embd, head_size, use_bias=False, rngs=nnx.Rngs(0))
+        self.value = nnx.Linear(n_embd, head_size, use_bias=False, rngs=nnx.Rngs(0))
+        self.mask = jnp.tril(jnp.ones((block_size, block_size)))
         
 
     def __call__(self, x): 
@@ -98,7 +97,6 @@ class Head(nnx.Module):
             self.mask
             )
     
-
 
 @jax.jit
 def MultiHead_forward(x, heads_wei, proj_wei):
@@ -113,9 +111,9 @@ def MultiHead_forward(x, heads_wei, proj_wei):
 class MultiHeadAttention(nnx.Module): 
 
     def __init__(self, num_heads, head_size):
-        super().__init__()
+        
         self.heads = [Head(head_size) for _ in range(num_heads)]
-        self.proj  = nnx.Linear(n_embd, n_embd)
+        self.proj  = nnx.Linear(n_embd, n_embd, rngs=nnx.Rngs(0))
     
     def __call__(self, x): 
         
@@ -140,10 +138,9 @@ def feed_forward(x, w1, w2):
 class FeedForward(nnx.Module): 
 
     def __init__(self, n_embd): 
-        super().__init__()
         
-        self.w1 = nnx.Linear(n_embd, 4 * n_embd), 
-        self.w2 = nnx.Linear(4 * n_embd, n_embd)
+        self.w1 = nnx.Linear(n_embd, 4 * n_embd, rngs=nnx.Rngs(0)), 
+        self.w2 = nnx.Linear(4 * n_embd, n_embd, rngs=nnx.Rngs(0))
         
     def __call__(self, x): 
         return feed_forward(x, self.w1.weight, self.w2.weight)
@@ -154,9 +151,10 @@ def layer_norm(x, gamma, beta, eps=1e-5):
     variance = jnp.var(x, axis=-1, keepdims=True)
     x_norm = (x - mean) / jnp.sqrt(variance + eps)
     return gamma * x_norm + beta
+
 class LayerNorm(nnx.Module):
     def __init__(self, dim, eps=1e-5):
-        super().__init__()
+        
         self.gamma = jnp.ones(dim)  
         self.beta = jnp.zeros(dim)  
         self.eps = eps
@@ -169,8 +167,9 @@ class Block(nnx.Module):
     """ Transformer block: communication + computation """
 
     def __init__(self, n_embd, n_head): 
-        super().__init__()
+      
         head_size = n_embd // n_head
+
         self.sa = MultiHeadAttention(n_head, head_size)
         self.ffwd = FeedForward(n_embd)
         self.ln1 = LayerNorm(n_embd)
@@ -186,7 +185,7 @@ class Block(nnx.Module):
     
 class BigramLM(nnx.Module):
     def __init__(self, vocab_size):
-        super().__init__()
+        
         # Initialize embedding with proper scaling
         self.token_embedding = jnp.array(
             random.normal(random.PRNGKey(1337), (vocab_size, n_embd)) * 0.02
@@ -197,7 +196,7 @@ class BigramLM(nnx.Module):
         
         self.blocks = nnx.Sequential(*[Block(n_embd, n_head) for _ in range(n_layer)])
         self.ln_f = LayerNorm(n_embd)
-        self.lm_head = nnx.Linear(n_embd, vocab_size, rngs=rngs)
+        self.lm_head = nnx.Linear(n_embd, vocab_size, rngs=nnx.Rngs(0))
 
     def __call__(self, idx, targets=None):
 
@@ -236,23 +235,5 @@ class BigramLM(nnx.Module):
             idx = jnp.concatenate((idx, idx_next[:, None]), axis=1)
         return idx
 
-        
 
-
-#----
 model = BigramLM(vocab_size)
-
-@jax.jit
-def train_step(parameters, opt_state, batch):
-
-  def loss_fn(p):
-    logits, loss = model.apply(parameters, batch[0], batch[1])
-    print(loss)
-    return loss 
-
-  loss, grads = jax.value_and_grad(loss_fn)(parameters)
-  updates, new_opt_state = optimizer.update(grads, opt_state, parameters)
-  new_params = optax.apply_updates(parameters, updates)
-
-  return new_params, new_opt_state, loss
-
