@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="logo.png" alt="jaxGPT" width="400">
+</div>
+
 # jaxGPT - A Minimal GPT implementatoin in JAX
 
 A lightweight implementation of a GPT-like transformer model using JAX and Flax's NNX module. This code demonstrates autoregressive text generation, multi-head attention, and a training loop with Optax.
@@ -8,7 +12,7 @@ A lightweight implementation of a GPT-like transformer model using JAX and Flax'
     - Efficient JAX JIT compilation (we can do better tho!)
 
 ## Model Architecture 
-    - Mult-head self-attention 
+    - Multi-head self-attention 
     - 4 transformer block
     - LayerNorm with residual connections 
     - 64-dim embeddings with a vocabulary-sized output head
