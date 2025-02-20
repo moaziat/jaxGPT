@@ -173,7 +173,7 @@ for iter in range(max_iters):
   params, opt_state, loss = train_step(params, opt_state, x, y)
 
   if iter % 100 == 0: 
-    print(f'step{loss}')
+    print(f'step: {iter}, loss: {loss}')
 
 #---- Store the new params
 nnx.update(model, params)

@@ -6,6 +6,9 @@
 
 A lightweight implementation of a GPT-like transformer model using JAX and Flax's NNX module. This code demonstrates autoregressive text generation, multi-head attention, and a training loop with Optax.
 
+
+Note: My goal is to re-implement minGPT (maybe nanoGPT too ) all in jax/flax, so we're going to expand this repository a lot more. 
+
 ## Features 
     - Transformer architecture with multi-head attention
     - Text generation 
