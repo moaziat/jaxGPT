@@ -49,7 +49,7 @@ conselds, let where I will becalle
 ```
 
 
-### Refereneces
+### References
 
  - https://github.com/karpathy/ng-video-lecture
  - https://arxiv.org/abs/1706.03762v7: Attention Is All You Need
