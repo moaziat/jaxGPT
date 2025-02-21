@@ -36,13 +36,10 @@ pip install flax optax
 clone the repo then:
 ```bash
 python /model/jaxGPT.py
-```plt.plot(stepi, lossi)
-plt.xlabel('Iteration')
-plt.ylabel('Loss')
-plt.show()
+
+```
 
 ## Output 
-```
 KING RIVH:
 It genton. I was the grief
 Forth the time of is offected: how God noug-leakes?
