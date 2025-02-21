@@ -4,7 +4,7 @@ import jax.numpy as jnp
 import jax.random as random
 from flax import nnx
 from functools import partial
-
+import matplotlib.pyplot as plt
 
 # Hyperparameters
 batch_size = 16
@@ -182,6 +182,14 @@ nnx.update(model, params)
 #-------------------------
 
 #generate example
+print("#---------------------------Generating")
 start = jnp.array([[stoi['\n']]])  # Example starting token
 generated = model.generate(start, max_new_tokens=500, key=random.PRNGKey(0))
 print(decode(generated[0].tolist()))
+
+#-- Plot loss
+
+plt.plot(stepi, lossi)
+plt.xlabel('Iteration')
+plt.ylabel('Loss')
+plt.show()
