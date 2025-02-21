@@ -37,9 +37,10 @@ clone the repo then:
 ```bash
 python /model/jaxGPT.py
 
-```
+
 
 ## Output 
+```
 KING RIVH:
 It genton. I was the grief
 Forth the time of is offected: how God noug-leakes?
