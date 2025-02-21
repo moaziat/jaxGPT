@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="logo.png" alt="jaxGPT" width="400">
+  <img src="./assets/logo.png" alt="jaxGPT" width="400">
 </div>
 
 # jaxGPT - A Minimal GPT implementatoin in JAX
@@ -19,7 +19,6 @@ Note: My goal is to re-implement minGPT (maybe nanoGPT too ) all in jax/flax, so
     - 4 transformer block
     - LayerNorm with residual connections 
     - 64-dim embeddings with a vocabulary-sized output head
-## Dependecies 
 
 ## Installation
 
@@ -28,8 +27,13 @@ Note: My goal is to re-implement minGPT (maybe nanoGPT too ) all in jax/flax, so
 ```bash
 pip install flax optax
 ```
-## Output 
 
+### Run it
+clone the repo then: 
+```bash
+python /model/jaxGPT.py
+```
+## Output 
 ```
 KING RIVH:
 It genton. I was the grief

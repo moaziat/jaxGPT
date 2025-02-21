@@ -21,7 +21,7 @@ tril_mask = jnp.tril(jnp.ones((block_size, block_size)))
 key = random.PRNGKey(1337)
 
 # Data loading
-with open('input.txt', 'r', encoding='utf-8') as f:
+with open('./data/input.txt', 'r', encoding='utf-8') as f:
     text = f.read()
 
 chars = sorted(list(set(text)))
@@ -150,7 +150,7 @@ print(f'Number of parameters: {param_count}')
 optimizer = optax.adamw(lr)
 opt_state = optimizer.init(params)
 
-#--- most important step (I was sleep deprived just to understand how to pass model's params in loss the loss fun)
+#--- most important step (I was sleep deprived just to understand how to pass model's params to the loss fun)
 @nnx.jit
 def loss_fn(params, x, y):
     nnx.update(model, params) #this is a crucial line 
@@ -166,16 +166,18 @@ def train_step(params, opt_state, x, y):
     new_params = optax.apply_updates(params, updates)
     return new_params, new_opt_state, loss
 
+lossi = []
+stepi = []
 for iter in range(max_iters): 
   key, subkey = random.split(key)
   x, y = get_batch(subkey, 'train')
   
   params, opt_state, loss = train_step(params, opt_state, x, y)
-
+  lossi.append(loss)
   if iter % 100 == 0: 
-    print(f'step: {iter}, loss: {loss}')
-
-#---- Store the new params
+    print(f'step: {iter} -> loss: {loss}')
+  stepi.append(iter)
+#---- updates model with post-training params
 nnx.update(model, params)
 #-------------------------
 
