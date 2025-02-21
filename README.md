@@ -7,6 +7,10 @@
 A lightweight implementation of a GPT-like transformer model using JAX and Flax's NNX module. This code demonstrates autoregressive text generation, multi-head attention, and a training loop with Optax.
 
 
+<div align="center">
+  <img src="./assets/loss.png" alt="jaxGPT" width="400">
+</div>
+
 Note: My goal is to re-implement minGPT (maybe nanoGPT too ) all in jax/flax, so we're going to expand this repository a lot more. 
 
 ## Features 
@@ -29,10 +33,14 @@ pip install flax optax
 ```
 
 ### Run it
-clone the repo then: 
+clone the repo then:
 ```bash
 python /model/jaxGPT.py
-```
+```plt.plot(stepi, lossi)
+plt.xlabel('Iteration')
+plt.ylabel('Loss')
+plt.show()
+
 ## Output 
 ```
 KING RIVH:
