@@ -6,6 +6,14 @@ from flax import nnx
 from functools import partial
 import matplotlib.pyplot as plt
 
+
+#---------------------------------------------
+# data loading
+with open('./data/input.txt', 'r', encoding='utf-8') as f:
+    text = f.read()
+#----------------------------------------------
+
+
 # Hyperparameters
 batch_size = 16
 block_size = 256
@@ -20,9 +28,6 @@ dropout = 0.0
 tril_mask = jnp.tril(jnp.ones((block_size, block_size)))
 key = random.PRNGKey(1337)
 
-# Data loading
-with open('./data/input.txt', 'r', encoding='utf-8') as f:
-    text = f.read()
 
 chars = sorted(list(set(text)))
 vocab_size = len(chars)
@@ -101,7 +106,7 @@ def compute_loss(logits, targets):
     return optax.softmax_cross_entropy_with_integer_labels(logits, targets).mean()
 
 
-class BigramLM(nnx.Module):
+class jaxGPTLM(nnx.Module):
 
     def __init__(self, rngs):
         self.tok_emb = nnx.Embed(vocab_size, n_embd, rngs=rngs)
@@ -141,7 +146,7 @@ class BigramLM(nnx.Module):
 
 
 #--- Model init
-model = BigramLM(rngs=nnx.Rngs(1337))
+model = jaxGPTLM(rngs=nnx.Rngs(1337))
 params = nnx.state(model, nnx.Param)
 param_count = sum(x.size for x in jax.tree_util.tree_leaves(params)) / 1e6 
 print(f'Number of parameters: {param_count}')
@@ -177,6 +182,7 @@ for iter in range(max_iters):
   if iter % 100 == 0: 
     print(f'step: {iter} -> loss: {loss}')
   stepi.append(iter)
+  
 #---- updates model with post-training params
 nnx.update(model, params)
 #-------------------------
