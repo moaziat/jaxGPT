@@ -43,7 +43,8 @@ python /model/jaxGPT.py
 
 ## Output 
 Example 1: Training on the tiny-shakespeare dataset: 
-generated output:
+
+- generated output:
 
 ```
 
@@ -63,8 +64,8 @@ Intives that thither-buney, we heart this grule commends
 By the ritory striken time of their
 conselds, let where I will becalle
 ```
-Example 2: Training on a names datasets 
-names generated:
+Example 2: Training on a names dataset 
+- names generated:
 ```
 breesmin
 kindley
