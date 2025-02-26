@@ -42,6 +42,9 @@ python /model/jaxGPT.py
 
 
 ## Output 
+Example 1: Training on the tiny-shakespeare dataset: 
+generated output:
+
 ```
 
 KING RIVH:
@@ -60,6 +63,63 @@ Intives that thither-buney, we heart this grule commends
 By the ritory striken time of their
 conselds, let where I will becalle
 ```
+Example 2: Training on a names datasets 
+names generated:
+```
+breesmin
+kindley
+britlynn
+iassiqu
+floreca
+catle
+peava
+theania
+yaanira
+hanvaron
+neasea
+orrell
+cinjaya
+daraz
+quaniella
+blaver
+jushadomie
+treymeca
+shayana
+julene
+share
+istofano
+nariah
+mckinda
+iskia
+kashir
+arhiyah
+letena
+estina
+asamie
+azur
+aralie
+stara
+keiliy
+yyena
+josebe
+breya
+sinna
+seondro
+ramek
+zariah
+shakerra
+fairah
+demariy
+siara
+clanda
+saprion
+naimah
+shety
+marlon
+cailla
+```
+
+ 
 
 
 ### References
