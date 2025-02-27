@@ -34,7 +34,7 @@ pip install flax optax
 ### Run it
 clone the repo then:
 ```bash
-python traing.py
+python train.py
 ```
 
 
