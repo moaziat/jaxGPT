@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./assets/logo.png" alt="jaxGPT" width="400">
+  <img src="./assets/logo_new.png" alt="jaxGPT" width="400">
 </div>
 
 # jaxGPT - A Minimal GPT implementatoin in JAX
