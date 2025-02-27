@@ -98,6 +98,7 @@ cython_debug/
 # Vim / Emacs
 *.swp
 *.swo
+*.md.swp
 *~
 \#*\#
 .\#*

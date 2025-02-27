@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 
 #----
-max_iters = 5000 
+max_iters = 200
 lr  = 1e-3
 key = random.PRNGKey(1337)
 
