@@ -5,8 +5,7 @@
 # jaxGPT - A Minimal GPT implementatoin in JAX
 
 A lightweight implementation of a GPT-like transformer model using JAX and Flax's NNX module. This code demonstrates autoregressive text generation, multi-head attention, and a training loop with Optax.
-The code implements a parallel training on multiple devices.
-
+The code handles training on multiple devices automatically through positional sharding.
 <div align="center">
   <img src="./assets/loss.png" alt="jaxGPT" width="400">
 </div>
@@ -35,7 +34,7 @@ pip install flax optax
 ### Run it
 clone the repo then:
 ```bash
-python /model/jaxGPT.py
+python traing.py
 ```
 
 
