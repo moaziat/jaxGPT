@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 #---------------------------------------------
 # data loading
-with open('../data/input.txt', 'r', encoding='utf-8') as f:
+with open('/data/input.txt', 'r', encoding='utf-8') as f:
     text = f.read()
 #----------------------------------------------
 
