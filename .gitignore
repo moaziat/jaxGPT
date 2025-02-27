@@ -101,6 +101,8 @@ cython_debug/
 *.md.swp
 *.swo 
 *.swn
+# Vim swap files
+*.sw?
 *~
 \#*\#
 .\#*
