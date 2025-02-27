@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 #----
 max_iters = 5000 
-lr = lr = 1e-3
+lr  = 1e-3
 key = random.PRNGKey(1337)
 
 
@@ -74,6 +74,12 @@ nnx.update(model, sharded_params)
 #-------------------------
 
 #generate example
+''' 
+(**) The model takes too long to generate output, it trains faster on multiple GPUs but takes
+longer to generate on multiple devices.
+Because we use a fraction of each gpu to do a small computation. 
+I'll try to come up with a solution later.
+'''
 print("#---------------------------Generating")
 start = jnp.array([[stoi['\n']]])  # Example starting token
 generated = model.generate(start, max_new_tokens=500, key=random.PRNGKey(0))
