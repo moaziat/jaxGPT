@@ -1,3 +1,6 @@
+[![jaxGPT pipeline](https://github.com/moaziat/jaxGPT/actions/workflows/ci.yml/badge.svg)](https://github.com/moaziat/jaxGPT/actions/workflows/ci.yml)
+
+
 <div align="center">
   <img src="./assets/logo_new.png" alt="jaxGPT" width="400">
 </div>
