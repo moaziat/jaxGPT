@@ -22,7 +22,6 @@ jobs:
       - name: 
         runs-on: |
           cd .github/workflows/scripts && python check_notebooks.py
-      - name: 
 
 
   
