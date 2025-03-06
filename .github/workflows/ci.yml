@@ -13,15 +13,14 @@ jobs:
     steps: 
       - uses: actions/checkout@v3 
       - name: Set up Python 3.12
+      - uses: actions/setup-python@v4
         with: 
           python-version:'3.12.2'
       
       - name: 
-        runs-on: | 
-          python -c "import sys; print(sys.version)"
+        run: python -c "import sys; print(sys.version)"
       - name: 
-        runs-on: |
-          cd .github/workflows/scripts && python check_notebooks.py
-
+        run: cd .github/workflows/scripts && python check_notebooks.py
+ 
 
   
