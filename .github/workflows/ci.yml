@@ -17,10 +17,10 @@ jobs:
           python-version:'3.12.2'
       
       - name: 
-        run: | 
+        runs-on: | 
           python -c "import sys; print(sys.version)"
       - name: 
-        run: |
+        runs-on: |
           cd .github/workflows/scripts && python check_notebooks.py
       - name: 
 
