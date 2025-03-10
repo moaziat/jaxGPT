@@ -37,7 +37,7 @@ pip install flax optax
 ### Run it
 clone the repo then:
 ```bash
-python train.py
+python train.py --max_iters 200000 --lr 1e-3
 ```
 
 
