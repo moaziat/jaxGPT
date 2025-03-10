@@ -20,7 +20,7 @@ jobs:
       - name: 
         run: python -c "import sys; print(sys.version)"
       - name : check notebooks
-        run : cd /.github/scripts/ && python check_notebooks.py
+        run : cd .github/scripts/ && python check_notebooks.py
 
       - name : Test train
         run : python train.py --max_iters 100
