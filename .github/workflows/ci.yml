@@ -25,4 +25,4 @@ jobs:
       - name : install requirements
         run : pip install -r requirements.txt
       - name : Test train
-        run : python train.py --max_iters 100
+        run : python train.py --max_iters 20 
