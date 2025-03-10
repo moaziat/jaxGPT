@@ -1,6 +1,7 @@
 import jax
 import jax.numpy as jnp
 import optax
+import argparse
 import flax.nnx as nnx
 import jax.random as random
 from jax.sharding import PositionalSharding
@@ -9,16 +10,26 @@ import matplotlib.pyplot as plt
 
 
 
-#----
-max_iters = 200
-lr  = 1e-3
+#---- Hyper-params
+parser = argparse.ArgumentParser("jaxGPT trainer")
+parser.add_argument('--max_iters', type=int, default=200, help="Maximum training iterations")
+parser.add_argument('--lr', type=float, default=1e-3, help="Model learning rate")
+
+args = parser.parse_args()
+max_iters = args.max_iters
+lr = args.lr
+
+
 key = random.PRNGKey(1337)
-
-
-#---- Sharding
+#---- Sharding (training on multi-GPUs)
 devices = jax.devices()
 num_devices = len(devices)
+
+#print training infos
 print(f'Available training devices: {devices}')
+print(f'max_iters set to : {max_iters}')
+print(f'Learning rate set to {lr}')
+
 
 sharding = PositionalSharding(devices)
 
@@ -27,6 +38,9 @@ def shard_data(data):
 
 def shard_params(params): 
    return jax.tree_util.tree_map(lambda p: jax.device_put(p, sharding.replicate()), params)
+
+
+
 #--- Model init
 model = jaxGPTLM(rngs=nnx.Rngs(1337))
 params = nnx.state(model, nnx.Param)
@@ -38,6 +52,7 @@ sharded_params = shard_params(params)
 #--- Optimizer init
 optimizer = optax.adamw(lr)
 opt_state = optimizer.init(sharded_params)
+
 
 #--- most important step (I was sleep deprived just to understand how to pass model's params to the loss fun)
 @nnx.jit
@@ -91,3 +106,7 @@ plt.plot(stepi, lossi)
 plt.xlabel('Iteration')
 plt.ylabel('Loss')
 plt.show()
+
+
+
+
