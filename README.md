@@ -13,7 +13,6 @@ The code handles training on multiple devices automatically through positional s
   <img src="./assets/loss.png" alt="jaxGPT" width="400">
 </div>
 
-Note: My goal is to re-implement minGPT (maybe nanoGPT too ) all in jax/flax, so we're going to expand this repository a lot more.
 
 ## Features 
     - Transformer architecture with multi-head attention
