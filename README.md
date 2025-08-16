@@ -5,7 +5,7 @@
   <img src="./assets/logo_new.png" alt="jaxGPT" width="400">
 </div>
 
-# jaxGPT - A Minimal GPT implementatoin in JAX
+## jaxGPT - A Minimal GPT implementatoin in JAX
 
 A lightweight implementation of a GPT-like transformer model with 1.6M parameters (for now!!) using JAX and Flax's NNX module. This code demonstrates autoregressive text generation, multi-head attention, and a training loop with Optax.
 The code handles training on multiple devices automatically through positional sharding.
@@ -14,18 +14,8 @@ The code handles training on multiple devices automatically through positional s
 </div>
 
 
-## Features 
-    - Transformer architecture with multi-head attention
-    - Text generation 
-    - Efficient JAX JIT compilation (we can do better tho!)
-    - Training on multiple devices 
-## Model Architecture 
-    - Multi-head self-attention 
-    - 4 transformer block
-    - LayerNorm with residual connections 
-    - 64-dim embeddings with a vocabulary-sized output head
 
-## Installation
+### Installation
 
 1. Ensure JAX is installed (follow instructions for your hardware [here](https://github.com/google/jax#installation)).
 2. Install dependencies:
@@ -42,7 +32,7 @@ python train.py --max_iters 200000 --lr 1e-3
 
 
 
-## Output 
+### Output 
 Example 1: Training on the tiny-shakespeare dataset: 
 
 - generated output:
